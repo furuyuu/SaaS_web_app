@@ -3,7 +3,10 @@
 import { GenerateImageState } from "@/types/actions";
 
     
-export async function generateImage(state: GenerateImageState, formData: FormData): Promise<GenerateImageState> {
+export async function generateImage(
+    state: GenerateImageState,
+    formData: FormData
+): Promise<GenerateImageState> {
     const keyword = formData.get("keyword");
 
     if(!keyword || typeof keyword !== "string") {
@@ -11,7 +14,7 @@ export async function generateImage(state: GenerateImageState, formData: FormDat
             status: "error",
             error: "キーワードを入力してください。",
         };
-    };
+    }
 
     try {
         const response = await fetch(`${process.env.BASE_URL}/api/generate-image`, {
@@ -30,7 +33,6 @@ export async function generateImage(state: GenerateImageState, formData: FormDat
             keyword: keyword,
         };
     } catch (error) {
-        console.error(error);
         return {
             status: "error",
             error: "画像の生成に失敗しました。"

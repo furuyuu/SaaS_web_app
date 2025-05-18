@@ -1,39 +1,26 @@
 "use client";
 
+import { generateImage } from '@/actions/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 import { GenerateImageState } from '@/types/actions';
+import { Download, ImageIcon, Loader } from 'lucide-react';
 import React, { useActionState } from 'react'
+import LoadingSpinner from '../loading-spinner';
 
 const initialState: GenerateImageState = {
     status: "idle",
 };
 
 const ImageGenerator = () => {
-    const [state, formAction] = useActionState(generateImage, initialState);
-
-    async function generateImage(formData: FormData) {
-        // "use server";
-        const keyword = formData.get("keyword");
-
-        try {
-            await fetch(`${process.env.BASE_URL}/api/generate-image`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ keyword}),
-            });
-        } catch (error) {
-            console.error(error);
-        }
-    }
+    const [state, formAction, pending] = useActionState(generateImage, initialState);
 
     return (
         <div className="space-y-6">
             <div className="space-y-4">
-                <form action={generateImage} className="space-y-4">
+                <form action={formAction} className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="keyword">キーワード</Label>
                         <Input
@@ -45,11 +32,42 @@ const ImageGenerator = () => {
                         
                     </div>
                     {/* submit button */}
-                    <Button>画像を生成する</Button>
+                    <Button
+                        type="submit"
+                        disabled={pending}
+                        className={cn("w-full duration-200", pending && "bg-primary/80")}
+                    >
+                        {pending ? (
+                            <LoadingSpinner />
+                        ) : (
+                            <>
+                                <ImageIcon className="mr-2" />
+                            </>
+                        )}
+                    </Button>
                 </form>
             </div>
             {/* image preview */}
-            <div></div>
+            {state.imageUrl && (
+                <div className="space-y-4">
+                    <div className="overflow-hidden rounded-lg border bg-background">
+                        <div className="aspect-video relative">
+                            <img 
+                                src={state.imageUrl} 
+                                alt="Generated image"
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                    </div>
+                    <Button
+                        className="w-full"
+                        variant={"secondary"}
+                        onClick={handleDoonload}>
+                        <Download className="mr-2" />
+                        ダウンロード
+                    </Button>
+                </div>
+            )}
         </div>
     )
 }
